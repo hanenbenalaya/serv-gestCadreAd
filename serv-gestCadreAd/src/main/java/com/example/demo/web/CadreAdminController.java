@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -26,11 +27,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.exception.ResourceNotFoundException;
 import com.example.demo.entities.Cadreadmin;
+import com.example.demo.entities.Stat;
 import com.example.demo.repos.AdminRepository;
 import com.example.demo.service.CadreAdminService;
+@CrossOrigin("*")
 
 @RestController
-@RequestMapping("/api/cd")
 public class CadreAdminController {
 	@Autowired
 	private  AdminRepository CadreAdminRepos;
@@ -43,19 +45,30 @@ public class CadreAdminController {
 		Page<Cadreadmin> Cadreadmins = CadreAdminRepos.findAll(PageRequest.of(page, size));
 		return Cadreadmins;
 	}
-	@GetMapping("/cads/tauxabs")
-	public float gettauxabs() {
-
+	@GetMapping("/cads/stat")
+	public Stat gettauxabs() {
+       Stat s=new Stat();
 		ArrayList<Integer> abs = CadreAdminRepos.findnbrAbscence();
-		int nb=0;
-		for( int i:abs ) {nb+=i;
+		ArrayList<Integer> ch = CadreAdminRepos.findnbrChargeh();
+		int nb2=0;
+		int nb1=0;
+		for( int j:ch ) {nb2+=j;
+		System.out.println(" nb ch :"+j);}
+		for( int i:abs ) {nb1+=i;
 		System.out.println(" nb abs :"+i);}
 		int n= (int) CadreAdminRepos.countCadreadmin();
 		System.out.println("nbr des cad :"+n);
-		float taux= (float)nb/n;
-		System.out.println("taux d'abscence :"+taux);
-		return taux;
+		float moy1= (float)nb1/n;
+		float moy2= (float)nb2/n;
+		float taux= (float)nb1/nb2*100;
+       s.setMoyabs(moy1);
+       s.setMoychh(moy2);
+       s.setTauxabs(taux);
+
+		System.out.println("taux d'abscence :"+moy1);
+		return s;
 	}
+	
 	@GetMapping("/cadsid/{id}")
 	public ResponseEntity<Cadreadmin> getCadreAdminById(@PathVariable(value = "id") Long cadId) {
 		Cadreadmin cadreadmin= cadreAdminService.getCadreAdminById(cadId).get();
@@ -67,25 +80,24 @@ public class CadreAdminController {
 		return ResponseEntity.ok().body(cadreadmin);
 	}
 	@GetMapping("/cadsnom/{nom}")
-	public ResponseEntity<Cadreadmin> getCadreAdminByName(@PathVariable(value = "nom") String nom) {
-		Cadreadmin cadreadmin= cadreAdminService.getCadreAdminByname(nom).get();
-		return ResponseEntity.ok().body(cadreadmin);
+	public Page<Cadreadmin> getCadreAdminByName(@PathVariable(value = "nom") String nom ,@RequestParam(name="page")int page,@RequestParam(name="size", defaultValue="5")int size) {
+		Page<Cadreadmin>cadreadmin= CadreAdminRepos.findByNomContaining(nom,PageRequest.of(page, size));
+		return cadreadmin;
 	}
 
 	
 	  @GetMapping( "/cadsc/{dt1}/{dt2}") 
-	  public ResponseEntity<List<Cadreadmin>>
-	  getCadreAdminByMC(@PathVariable(value = "dt1") String dt1,@PathVariable(value
-	  = "dt2") String dt2) throws ParseException {
+	  public Page<Cadreadmin> getCadreAdminByMC(@PathVariable(value = "dt1") String dt1,@PathVariable(value
+	  = "dt2") String dt2,@RequestParam(name="page")int page,@RequestParam(name="size", defaultValue="5")int size) throws ParseException {
 	  
 	  Date x1=new SimpleDateFormat("yyyy-MM-dd").parse(dt1); Date x2 =new
 	  SimpleDateFormat("yyyy-MM-dd").parse(dt2);
-	  System.out.println("intervale  recu :"+x1+","+x2); List<Cadreadmin>
-	  cadreadmin= cadreAdminService.getCadreAdminByMc(x1,x2).orElse(null); if
-	  (cadreadmin!=null) { return ResponseEntity.ok().body(cadreadmin);} else
-	  return null; }
+	  System.out.println("intervale  recu :"+x1+","+x2);
+	  Page<Cadreadmin> cadreadmin= CadreAdminRepos.findByMc(x1,x2,PageRequest.of(page, size)); 
+	  
+	  return cadreadmin; }
 	 
-	@PostMapping("/cads")
+	@PostMapping("/cadscreate")
 	public String  createCadreAdmin(@Valid @RequestBody Cadreadmin cadeg)throws ResourceNotFoundException {
 		System.out.println("Cadreadmin recu :"+cadeg);
 

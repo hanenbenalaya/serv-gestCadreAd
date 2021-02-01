@@ -6,6 +6,9 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.entities.Cadreadmin;
@@ -53,21 +56,13 @@ public class CadreAdminServiceImpl implements CadreAdminService{
 		return this.CadreAdminrepos.findByEmail(email);
 	}
 
-	@Override
-	public Optional<Cadreadmin> getCadreAdminByname(String name) {
 	
-		return  this.CadreAdminrepos.findByNom(name);
-	}
 
 	
 	
 
 	
-	@Override
-	public Optional<List<Cadreadmin>> getCadreAdminByMc(Date date1, Date date2) {
-		// TODO Auto-generated method stub
-		return this.CadreAdminrepos.findByMc(date1,date2);
-	}
+	
 
 	@Override
 	public Long countnbcad() {

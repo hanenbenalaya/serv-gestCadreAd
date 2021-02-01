@@ -5,6 +5,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+
 import com.example.demo.entities.Cadreadmin;
 
 public interface CadreAdminService {
@@ -19,10 +21,11 @@ public interface CadreAdminService {
 	  void deleteCadreAdmin(Cadreadmin ca);
 	  
 	 Optional<Cadreadmin> getCadreAdminByemail(String email );
-	 Optional<Cadreadmin> getCadreAdminByname(String name );
+	
 		
-     Optional<List<Cadreadmin>> getCadreAdminByMc(Date date1,Date date2 );
+    
      Long countnbcad();
+     
      ArrayList<Integer> findnbabs();
 		 
 
